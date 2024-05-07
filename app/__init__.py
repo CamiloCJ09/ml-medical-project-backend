@@ -25,8 +25,8 @@ def create_app():
     def transformData(data):
       modified_data = {}
       for key, value in data.items():
-        modified_data[key + '_0'] = 1 - int(value)  # 0 si True, 1 si False
-        modified_data[key + '_1'] = int(value)  # 1 si True, 0 si False
+        modified_data[key + '_0'] = not value  # 0 si True, 1 si False
+        modified_data[key + '_1'] = value  # 1 si True, 0 si False
       return modified_data
       
     @app.route('/predict', methods=['POST'])
@@ -35,19 +35,13 @@ def create_app():
         data = request.get_json()
         transformed_data = transformData(data)
         
-        df = pd.DataFrame(transformed_data, index=[0])
+        df = pd.DataFrame(transformed_data, index=[1])
         model = load('random_forest_TF.joblib')
-       
+        # minmax_scale = preprocessing.MinMaxScaler(feature_range=(0, 1))
         # Make a prediction
-        processed_data = minmax_scale.fit_transform(df)
-        prediction = model.predict(processed_data)
+        #processed_data = minmax_scale.fit_transform(df)
+        prediction = model.predict(df)
         # Return the prediction
-      return str(prediction)
-      
-    def getAccuracy():
-      model = load('random_forest_TF.joblib')
-      X_test = pd.read_csv('X_test.csv')
-      y_test = pd.read_csv('y_test.csv')
-      y_pred = model.predict(X_test)
-      return metrics.accuracy_score(y_test, y_pred)
+      return str(prediction[0])
+    
     return app
