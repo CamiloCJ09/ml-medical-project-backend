@@ -6,12 +6,13 @@ from sklearn import tree , metrics
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import preprocessing
 import pandas as pd
+from flask_cors import CORS
 
-minmax_scale = preprocessing.MinMaxScaler(feature_range=(0, 1))
+
 
 def create_app():
     app = Flask(__name__)
-
+    CORS(app, origins=["http://3.94.98.244", "*"])
     # Initialize Flask extensions here
 
     # Load the model
@@ -33,13 +34,13 @@ def create_app():
     def predict():
       if request.method == 'POST':
         data = request.get_json()
+        
         transformed_data = transformData(data)
+        
         
         df = pd.DataFrame(transformed_data, index=[1])
         model = load('random_forest_TF.joblib')
-        # minmax_scale = preprocessing.MinMaxScaler(feature_range=(0, 1))
-        # Make a prediction
-        #processed_data = minmax_scale.fit_transform(df)
+        
         prediction = model.predict(df)
         # Return the prediction
       return str(prediction[0])
